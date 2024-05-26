@@ -1,12 +1,19 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { useSelector } from 'react-redux';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
+import { selectCartTotal } from '../../store/cart/cart.selector';
+import { selectCurrentUser } from '../../store/user/user.selector';
 
 import { FormContainer, PaymentFormContainer } from './payment-form.styles';
+import { useState } from 'react';
 
 const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const amount = useSelector(selectCartTotal);
+  const currentUser = useSelector(selectCurrentUser);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const paymentHandler = async (e) => {
     e.preventDefault();
@@ -15,10 +22,12 @@ const PaymentForm = () => {
       return;
     }
 
+    setIsProcessingPayment(true);
+
     const response = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: 10000 }),
+      body: JSON.stringify({ amount: amount * 100 }),
     }).then((res) => res.json());
 
     const {
@@ -29,10 +38,12 @@ const PaymentForm = () => {
       payment_method: {
         card: elements.getElement(CardElement),
         billing_details: {
-          name: 'Chao Chen',
+          name: currentUser ? currentUser.displayName : 'Guest',
         },
       },
     });
+
+    setIsProcessingPayment(false);
 
     if (paymentResult.error) {
       alert(paymentResult.error);
@@ -48,7 +59,12 @@ const PaymentForm = () => {
       <FormContainer onSubmit={paymentHandler}>
         <h2>Credit Card Payment: </h2>
         <CardElement />
-        <Button buttonType={BUTTON_TYPE_CLASSES.inverted}> Pay now </Button>
+        <Button
+          isLoading={isProcessingPayment}
+          buttonType={BUTTON_TYPE_CLASSES.inverted}
+        >
+          Pay now
+        </Button>
       </FormContainer>
     </PaymentFormContainer>
   );
