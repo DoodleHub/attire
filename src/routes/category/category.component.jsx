@@ -9,7 +9,7 @@ import {
 } from '../../store/categories/category.selector';
 import Spinner from '../../components/spinner/spinner.component';
 
-import './category.styles.scss';
+import { CategoryContainer, Title } from './category.styles';
 
 const Category = () => {
   const { category } = useParams();
@@ -23,16 +23,16 @@ const Category = () => {
 
   return (
     <>
-      <h2 className="category-title">{category.toUpperCase()}</h2>
+      <Title>{category.toUpperCase()}</Title>
       {isLoading ? (
         <Spinner />
       ) : (
-        <div className="category-container">
+        <CategoryContainer>
           {products &&
             products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-        </div>
+        </CategoryContainer>
       )}
     </>
   );
