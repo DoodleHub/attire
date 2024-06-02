@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
 import {
   signInAuthUserWithEmailAndPassword,
@@ -26,11 +26,11 @@ const SignInForm = () => {
     try {
       await signInWithGooglePopup();
     } catch (error) {
-      console.log(error.message);
+      console.log('Google sign in failed', error);
     }
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
@@ -38,14 +38,11 @@ const SignInForm = () => {
 
       resetFormFields();
     } catch (error) {
-      if (error.code === 'auth/invalid-credential') {
-        alert('Incorrect email or password');
-      }
-      console.log(error);
+      console.log('User sign in failed', error);
     }
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setFormFields({ ...formFields, [name]: value });
